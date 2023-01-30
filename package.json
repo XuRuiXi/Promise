@@ -1,0 +1,14 @@
+{
+  "name": "promise",
+  "version": "1.0.0",
+  "description": "从 0 实现一个 A+规范的 Promise",
+  "main": "Promise.js",
+  "scripts": {
+    "test": ".\\node_modules\\.bin\\promises-aplus-tests promise.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "promises-aplus-tests": "^2.1.2"
+  }
+}
