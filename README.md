@@ -1,4 +1,4 @@
-**现在我们从 0 实现一个 A+规范的 Promise，并且实现 A+规范没有描述，但是我们常用的 catch、Promise.all、Promise.race、Promise.resolve、Promise.reject**
+**现在我们从 0 实现一个 A+规范的 Promise，并且实现 A+规范没有描述但是我们常用的 catch、finally、Promise.all、Promise.race、Promise.resolve、Promise.reject**
 
 首先我们声明一个 Promise 类
 
@@ -928,4 +928,56 @@ class Promise {
     })
   }
 }
+```
+
+
+**总结**
+
+从上述代码，我们总结几条Promise的使用规则
+
+1、如果then里面的onFulFilled, onRejected，不是函数，那么可以视作直接忽略该then函数。
+
+例：
+```js
+const p = new Promise((resolve) => {
+  resolve('success');
+})
+p
+.then(11,11)
+.then()
+.then(res => {
+  console.log(res) // success
+})
+```
+
+2、前一个的onFulFilled, onRejected的返回值都是传给下一个then，具体是下一个的onFulFilled还是onRejected接收，要看前一个then里面，executor改变的状态。  
+例：
+```js
+const p = new Promise((resolve, reject) => {
+  reject('failed');
+})
+p
+.then(
+  value => {
+    return 'success'
+  }
+  ,
+  reason => {
+    return Promise.resolve(reason)
+  }
+  )
+.then(
+  res => {
+    console.log(11111, res)
+  }
+  ,
+  reason => {
+    console.log(reason)
+  }
+)
+
+/* 
+最后打印
+11111 'failed'
+*/
 ```
