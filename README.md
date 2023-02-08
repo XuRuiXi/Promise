@@ -25,12 +25,12 @@ class Promise {
 我们使用的时候，给构造函数传入一个函数，例
 
 ```js
-new Promise((reslove, reject) => {
-  reslove("success");
+new Promise((resolve, reject) => {
+  resolve("success");
 });
 ```
 
-所以 Promise 的 constructor 应该接收一个函数 executor,并且 executor 接收 reslove 和 reject
+所以 Promise 的 constructor 应该接收一个函数 executor,并且 executor 接收 resolve 和 reject
 
 ```js
 class Promise {
@@ -42,7 +42,7 @@ class Promise {
   #value = undefined;
   #reason = undefined;
   constructor(executor) {
-    const reslove = (value) => {
+    const resolve = (value) => {
       // 只有pengding状态才能被修改
       if (this.#promiseState === this.#PENDING) {
         this.#value = value;
@@ -58,7 +58,7 @@ class Promise {
     };
     // 因为executor函数有可能抛出错误，所以要用try、catch包裹起来。
     try {
-      executor(reslove, reject);
+      executor(resolve, reject);
     } catch (err) {
       reject(err);
     }
@@ -70,8 +70,8 @@ class Promise {
 用法：
 
 ```js
-const p = new Promise((reslove, reject) => {
-  reslove("success");
+const p = new Promise((resolve, reject) => {
+  resolve("success");
 });
 p.then(
   (value) => {},
@@ -107,7 +107,7 @@ class Promise {
   #value = undefined;
   #reason = undefined;
   constructor(executor) {
-    const reslove = (value) => {
+    const resolve = (value) => {
       // 只有pengding状态才能被修改
       if (this.#promiseState === this.#PENDING) {
         this.#value = value;
@@ -123,7 +123,7 @@ class Promise {
     };
     // 因为executor函数有可能抛出错误，所以要用try、catch包裹起来。
     try {
-      executor(reslove, reject);
+      executor(resolve, reject);
     } catch (err) {
       reject(err);
     }
@@ -139,8 +139,8 @@ class Promise {
 }
 
 // 此时执行下面的代码，会打印'success'
-const p = new Promise((reslove, reject) => {
-  reslove("success");
+const p = new Promise((resolve, reject) => {
+  resolve("success");
 });
 p.then(
   (value) => {
@@ -152,12 +152,12 @@ p.then(
 
 **异步，依赖收集与触发**
 
-如果我们将执行代码改成下面这样,会发现'success'不会被打印出来。因为异步执行 reslove。所以执行 zhen 函数的时候，this.#promiseState 状态还没有被改变。
+如果我们将执行代码改成下面这样,会发现'success'不会被打印出来。因为异步执行 resolve。所以执行 zhen 函数的时候，this.#promiseState 状态还没有被改变。
 
 ```js
-const p = new Promise((reslove, reject) => {
+const p = new Promise((resolve, reject) => {
   setTimeout(() => {
-    reslove("success");
+    resolve("success");
   }, 1000);
 });
 p.then(
@@ -184,7 +184,7 @@ class Promise {
   #rejectList = [];
 
   constructor(executor) {
-    const reslove = (value) => {
+    const resolve = (value) => {
       // 只有pengding状态才能被修改
       if (this.#promiseState === this.#PENDING) {
         this.#value = value;
@@ -203,7 +203,7 @@ class Promise {
     };
     // 因为executor函数有可能抛出错误，所以要用try、catch包裹起来。
     try {
-      executor(reslove, reject);
+      executor(resolve, reject);
     } catch (err) {
       reject(err);
     }
@@ -242,6 +242,7 @@ class Promise{
     const promise = new Promise((resolve, reject) => {
       if (this.#promiseState === this.#FULFILLED) {
         const x = onFulFilled(this.#value);
+        // 这里其实并不能直接把x交给resolve，而是应该根据x值得不同，来执行不同得方法。但是目前到这里我们暂时按resolve处理。
         resolve(x);
       }
       if (this.#promiseState === this.#REJECTED) {
@@ -251,7 +252,7 @@ class Promise{
 
       onFulFilled && this.#resolveList.push(value => {
         const x = onFulFilled(value);
-          resolve(x);
+        resolve(x);
       })
       onRejected && this.#rejectList.push(reason => {
         const x = onRejected(reason);
@@ -266,9 +267,9 @@ class Promise{
 用法
 
 ```js
-const p = new Promise((reslove, reject) => {
+const p = new Promise((resolve, reject) => {
   setTimeout(() => {
-    reslove("success");
+    resolve("success");
   }, 1000);
 });
 p.then(
@@ -281,7 +282,7 @@ p.then(
 });
 ```
 
-从上面的例子可以看出，后面的 then 里面的 onFulFilled 接收上一个 then 的 onFulFilled 的返回值。因此我们需要把原来 then 里面的方法，放进新的 Promise 内去执行，得到上一个 onFulFilled 的结果之后，传给新的 Promise 的 onFulFilled。
+从上面的例子可以看出，后面的 then 里面的 onFulFilled 接收上一个 then 的 onFulFilled 的返回值。因此我们需要把上一个 then 里面的逻辑，放进新的 Promise 内去执行，得到上一个 onFulFilled 的结果之后，传给新的 Promise 的 onFulFilled。
 
 **A+还规定，如果 then 里面的 onFulFilled 和 onRejected 不是 function，那么忽略 then 里面的参数，把值传到后续的 zhen，onFulFilled 设置为传递 value 的函数就行，而 onRejected 则接收 reason 抛出错误**
 
@@ -301,7 +302,7 @@ class Promise {
   #rejectList = [];
 
   constructor(executor) {
-    const reslove = (value) => {
+    const resolve = (value) => {
       // 只有pengding状态才能被修改
       if (this.#promiseState === this.#PENDING) {
         this.#value = value;
@@ -320,7 +321,7 @@ class Promise {
     };
     // 因为executor函数有可能抛出错误，所以要用try、catch包裹起来。
     try {
-      executor(reslove, reject);
+      executor(resolve, reject);
     } catch (err) {
       reject(err);
     }
@@ -379,7 +380,7 @@ class Promise {
 根据第二阶段的代码，我们运行下面的例子
 
 ```js
-const p = new Promise((reslove, reject) => {
+const p = new Promise((resolve, reject) => {
   setTimeout(() => {
     reject("failed");
   }, 1000);
@@ -411,12 +412,12 @@ p.then(
 
 **处理特殊的返回值，例如返回值是 Promise 实例**
 
-下面的例子，按照 A+规范，第一个 onFulFilled（onRejected 同理）传递给下面 then 的值应该 resolve(value + "000")。这时我们就要特殊处理 onFulFilled 的返回值，根据不同类型的值，执行不同的方法。因为几个地方都需要处理，所以我们编写公共函数 resolvePromise 统一处理。
+下面的例子，按照 A+规范，第一个 onFulFilled（onRejected 同理）传递给下面 then 的值应该 value + "000"。这时我们就要特殊处理 onFulFilled 的返回值，根据不同类型的值，执行不同的方法。因为几个地方都需要处理，所以我们编写公共函数 resolvePromise 统一处理。
 
 ```js
-const p = new Promise((reslove, reject) => {
+const p = new Promise((resolve, reject) => {
   setTimeout(() => {
-    reslove("success");
+    resolve("success");
   }, 1000);
 });
 p.then(
@@ -582,12 +583,12 @@ class Promise {
       }
     }
 
-    const promise = new Promise((reslove, reject) => {
+    const promise = new Promise((resolve, reject) => {
       if (this.#promiseState === this.#FULFILLED) {
         microtask(() => {
           try {
             const x = onFulFilled(this.#value);
-            resolvePromise(x, reslove, reject)
+            resolvePromise(x, resolve, reject)
           } catch (err) {
             reject(err);
           }
@@ -598,7 +599,7 @@ class Promise {
         microtask(() => {
           try {
             const x = onRejected(this.#reason);
-            resolvePromise(x, reslove, reject)
+            resolvePromise(x, resolve, reject)
           } catch (err) {
             reject(err);
           }
@@ -609,7 +610,7 @@ class Promise {
         microtask(() => {
           try {
             const x = onFulFilled(value);
-            resolvePromise(x, reslove, reject)
+            resolvePromise(x, resolve, reject)
           } catch (err) {
             reject(err);
           }
@@ -620,7 +621,7 @@ class Promise {
         microtask(() => {
           try {
             const x = onRejected(reason);
-            resolvePromise(x, reslove, reject)
+            resolvePromise(x, resolve, reject)
           } catch (err) {
             reject(err);
           }
@@ -637,8 +638,8 @@ class Promise {
 
 ```js
 // 1
-const p = new Promise((reslove, reject) => {
-  reslove('success');
+const p = new Promise((resolve, reject) => {
+  resolve('success');
 });
 
 const p1 = p
@@ -701,7 +702,7 @@ class Promise {
 
   constructor(executor) {
 
-    const reslove = value => {
+    const resolve = value => {
       // 只有pengding状态才能被修改
       if (this.#promiseState === this.#PENDING) {
         this.#value = value;
@@ -719,7 +720,7 @@ class Promise {
       }
     }
     try {
-      executor(reslove, reject);
+      executor(resolve, reject);
     } catch (err) {
       reject(err);
     }
@@ -750,12 +751,12 @@ class Promise {
     }
 
 
-    const promise = new Promise((reslove, reject) => {
+    const promise = new Promise((resolve, reject) => {
       if (this.#promiseState === this.#FULFILLED) {
         microtask(() => {
           try {
             const x = onFulFilled(this.#value);
-            resolvePromise(promise, x, reslove, reject)
+            resolvePromise(promise, x, resolve, reject)
           } catch (err) {
             reject(err);
           }
@@ -768,7 +769,7 @@ class Promise {
         microtask(() => {
           try {
             const x = onRejected(this.#reason);
-            resolvePromise(promise, x, reslove, reject)
+            resolvePromise(promise, x, resolve, reject)
           } catch (err) {
             reject(err);
           }
@@ -781,7 +782,7 @@ class Promise {
         microtask(() => {
           try {
             const x = onFulFilled(value);
-            resolvePromise(promise, x, reslove, reject)
+            resolvePromise(promise, x, resolve, reject)
           } catch (err) {
             reject(err);
           }
@@ -792,7 +793,7 @@ class Promise {
         microtask(() => {
           try {
             const x = onRejected(reason);
-            resolvePromise(promise, x, reslove, reject)
+            resolvePromise(promise, x, resolve, reject)
           } catch (err) {
             reject(err);
           }
@@ -847,7 +848,7 @@ function resolvePromise(promise, x, resolve, reject) {
 
 
 **catch**  
-catch的本质还是一个then，只是它第一个参数时onReject。这里的this用的很巧妙，因为调用catch的是上一个then返回的Promise实例，所以这里的this指向的也是上一个Promise实例。因此.catch === .then。
+catch的本质还是一个then，只是它第一个参数是onReject。这里的this用的很巧妙，因为调用catch的是上一个then返回的Promise实例，所以这里的this指向的也是上一个Promise实例。因此.catch === .then。
 ```js
 class Promise {
   ...
@@ -868,12 +869,12 @@ class Promise {
 }
 ```
 
-**静态方法reslove和reject**  
-本质是返回一个新的Promise，分别执行reslove和reject
+**静态方法resolve和reject**  
+本质是返回一个新的Promise，分别执行resolve和reject
 ```js
 class Promise {
   ...
-  static reslove(value) {
+  static resolve(value) {
     return new Promise((resolve) => {
       resolve(value);
     })
