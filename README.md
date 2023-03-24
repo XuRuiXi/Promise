@@ -152,7 +152,7 @@ p.then(
 
 **异步，依赖收集与触发**
 
-如果我们将执行代码改成下面这样,会发现'success'不会被打印出来。因为异步执行 resolve。所以执行 zhen 函数的时候，this.#promiseState 状态还没有被改变。
+如果我们将执行代码改成下面这样,会发现'success'不会被打印出来。因为异步执行 resolve。所以执行 then 函数的时候，this.#promiseState 状态还没有被改变。
 
 ```js
 const p = new Promise((resolve, reject) => {
