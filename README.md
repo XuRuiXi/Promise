@@ -889,7 +889,7 @@ class Promise {
 ```
 
 
-**静态方法all和race**  
+**静态方法all、race、allSettled**  
 ```js
 class Promise {
   ...
@@ -923,6 +923,37 @@ class Promise {
           },
           reason => {
             reject(reason)
+          }
+        )
+      })
+    })
+  }
+
+    static allSettled(promiseList = []) {
+    return new Promise((resolve) => {
+      let count = 0;
+      const result = [];
+      promiseList.forEach((promise, index) => {
+        promise.then(
+          value => {
+            result[index] = {
+              status: 'fulfilled',
+              value
+            };
+            count += 1;
+            if (count === promiseList.length) {
+              resolve(result);
+            }
+          },
+          reason => {
+            result[index] = {
+              status: 'rejected',
+              reason
+            };
+            count += 1;
+            if (count === promiseList.length) {
+              resolve(result);
+            }
           }
         )
       })

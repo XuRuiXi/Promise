@@ -156,6 +156,37 @@ class Promise {
     })
   }
 
+  static allSettled(promiseList = []) {
+    return new Promise((resolve) => {
+      let count = 0;
+      const result = [];
+      promiseList.forEach((promise, index) => {
+        promise.then(
+          value => {
+            result[index] = {
+              status: 'fulfilled',
+              value
+            };
+            count += 1;
+            if (count === promiseList.length) {
+              resolve(result);
+            }
+          },
+          reason => {
+            result[index] = {
+              status: 'rejected',
+              reason
+            };
+            count += 1;
+            if (count === promiseList.length) {
+              resolve(result);
+            }
+          }
+        )
+      })
+    })
+  }
+
 
   static race(promiseList = []) {
     return new Promise((resolve, reject) => {
@@ -214,14 +245,44 @@ function resolvePromise(promise, x, resolve, reject) {
   }
 }
 
-// 单元测试使用
-Promise.defer = Promise.deferred = function () {
-  let dfd = {};
-  dfd.promise = new Promise((resolve, reject) => {
-    dfd.resolve = resolve;
-    dfd.reject = reject;
-  });
-  return dfd;
-}
+// 创建几个Promise实例，用于测试
+const p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('p1');
+  }, 1000);
+});
 
-module.exports = Promise;
+const p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('p2');
+  }, 2000);
+});
+
+const p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('p3');
+  }, 3000);
+});
+
+Promise.allSettled([p1, p2, p3])
+.then(res => {
+  console.log('all', res);
+  console.log(111);
+})
+.catch(err => {
+  console.log('all', err);
+  console.log(222);
+})
+
+
+// 单元测试使用
+// Promise.defer = Promise.deferred = function () {
+//   let dfd = {};
+//   dfd.promise = new Promise((resolve, reject) => {
+//     dfd.resolve = resolve;
+//     dfd.reject = reject;
+//   });
+//   return dfd;
+// }
+
+// module.exports = Promise;
